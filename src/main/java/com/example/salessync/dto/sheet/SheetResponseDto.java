@@ -7,7 +7,8 @@ import lombok.Data;
 
 @Data
 public class SheetResponseDto {
+    private Long id;
     private String name;
-    private UserResponseDto userResponseDto;
+    private UserResponseDto user;
     private List<LineResponseDto> lines;
 }

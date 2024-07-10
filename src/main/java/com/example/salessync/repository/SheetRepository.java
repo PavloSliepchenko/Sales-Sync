@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SheetRepository extends JpaRepository<Sheet, Long> {
     Optional<Sheet> findByIdAndUserId(Long id, Long userId);
 
-    Optional<Sheet> findByName(String name);
+    Optional<Sheet> findByNameAndUserId(String name, Long userId);
 
     List<Sheet> findAllByUserId(Long userId);
 }

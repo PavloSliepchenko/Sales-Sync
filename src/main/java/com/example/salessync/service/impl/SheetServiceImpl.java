@@ -10,6 +10,7 @@ import com.example.salessync.model.User;
 import com.example.salessync.repository.SheetRepository;
 import com.example.salessync.repository.UserRepository;
 import com.example.salessync.service.SheetService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,8 @@ public class SheetServiceImpl implements SheetService {
 
     @Override
     public SheetResponseDto addSheet(Long userId, CreateSheetRequestDto requestDto) {
-        Optional<Sheet> sheetOptional = sheetRepository.findByName(requestDto.name());
+        Optional<Sheet> sheetOptional =
+                sheetRepository.findByNameAndUserId(requestDto.name(), userId);
         if (sheetOptional.isPresent()) {
             throw new EntityAlreadyExistsException(String.format(
                     "Sheet with name %s already exists", requestDto.name()));
@@ -35,6 +37,7 @@ public class SheetServiceImpl implements SheetService {
         Sheet sheet = new Sheet();
         sheet.setName(requestDto.name());
         sheet.setUser(user);
+        sheet.setLines(new ArrayList<>());
         return sheetMapper.toDto(sheetRepository.save(sheet));
     }
 
@@ -48,6 +51,20 @@ public class SheetServiceImpl implements SheetService {
     @Override
     public SheetResponseDto getSheetById(Long userId, Long sheetId) {
         return sheetMapper.toDto(getSheetByIdAndUserId(sheetId, userId));
+    }
+
+    @Override
+    public SheetResponseDto updateSheetName(
+            Long userId, Long sheetId, CreateSheetRequestDto requestDto) {
+        Optional<Sheet> sheetOptional =
+                sheetRepository.findByNameAndUserId(requestDto.name(), userId);
+        if (sheetOptional.isPresent()) {
+            throw new EntityAlreadyExistsException(String.format(
+                    "Sheet with name %s already exists", requestDto.name()));
+        }
+        Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        sheet.setName(requestDto.name());
+        return sheetMapper.toDto(sheetRepository.save(sheet));
     }
 
     @Override

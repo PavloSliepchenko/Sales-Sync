@@ -11,5 +11,7 @@ public interface SheetService {
 
     SheetResponseDto getSheetById(Long userId, Long sheetId);
 
+    SheetResponseDto updateSheetName(Long userId, Long sheetId, CreateSheetRequestDto requestDto);
+
     void deleteSheetById(Long userId, Long sheetId);
 }

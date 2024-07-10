@@ -9,7 +9,10 @@ import com.example.salessync.model.Sheet;
 import com.example.salessync.model.Size;
 import com.example.salessync.repository.LineRepository;
 import com.example.salessync.repository.SheetRepository;
+import com.example.salessync.repository.SizeRepository;
 import com.example.salessync.service.LineService;
+
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class LineServiceImpl implements LineService {
     private final SheetRepository sheetRepository;
     private final LineRepository lineRepository;
+    private final SizeRepository sizeRepository;
     private final LineMapper lineMapper;
 
     @Override
@@ -32,6 +36,7 @@ public class LineServiceImpl implements LineService {
         line.setPrice(requestDto.getPrice());
         line.setSupply(requestDto.getSupply());
         line.setBrand(requestDto.getBrand());
+        line.setSizes(new ArrayList<>());
         Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
         if (sheet.getLines().size() > 0) {
             List<Size> sizeList = line.getSizes();
@@ -39,6 +44,7 @@ public class LineServiceImpl implements LineService {
                 Size size = new Size();
                 size.setName(e.getName());
                 sizeList.add(size);
+                sizeRepository.save(size);
             });
         }
         line.setSheet(sheet);
