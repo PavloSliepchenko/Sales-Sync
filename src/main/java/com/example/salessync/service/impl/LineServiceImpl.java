@@ -11,6 +11,7 @@ import com.example.salessync.repository.LineRepository;
 import com.example.salessync.repository.SheetRepository;
 import com.example.salessync.repository.SizeRepository;
 import com.example.salessync.service.LineService;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,10 @@ public class LineServiceImpl implements LineService {
         }
         if (requestDto.getPrice() != null) {
             line.setPrice(requestDto.getPrice());
+            if (line.getTotalQuantity() != null) {
+                line.setTotalPrice(
+                        BigDecimal.valueOf(line.getTotalQuantity()).multiply(line.getPrice()));
+            }
         }
         if (requestDto.getColor() != null) {
             line.setColor(requestDto.getColor());
@@ -69,6 +74,11 @@ public class LineServiceImpl implements LineService {
         }
         if (requestDto.getSeries() != null) {
             line.setSeries(requestDto.getSeries());
+            if (line.getQuantity() != null) {
+                line.setTotalQuantity(line.getQuantity() * line.getSeries());
+                line.setTotalPrice(
+                        BigDecimal.valueOf(line.getTotalQuantity()).multiply(line.getPrice()));
+            }
         }
         if (requestDto.getArticle() != null) {
             line.setArticle(requestDto.getArticle());
