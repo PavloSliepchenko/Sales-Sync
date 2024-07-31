@@ -1,18 +1,18 @@
 package com.example.salessync.service.impl;
 
-import com.example.salessync.dto.sheet.SheetResponseDto;
+import com.example.salessync.dto.sheet.SupplySheetResponseDto;
 import com.example.salessync.dto.size.CreateSizeRequestDto;
 import com.example.salessync.dto.size.SizeResponseDto;
 import com.example.salessync.exception.EntityAlreadyExistsException;
 import com.example.salessync.exception.EntityNotFoundException;
-import com.example.salessync.mapper.SheetMapper;
 import com.example.salessync.mapper.SizeMapper;
-import com.example.salessync.model.Line;
-import com.example.salessync.model.Sheet;
+import com.example.salessync.mapper.SupplySheetMapper;
 import com.example.salessync.model.Size;
-import com.example.salessync.repository.LineRepository;
-import com.example.salessync.repository.SheetRepository;
+import com.example.salessync.model.SupplySheet;
+import com.example.salessync.model.SupplySheetLine;
 import com.example.salessync.repository.SizeRepository;
+import com.example.salessync.repository.SupplySheetLineRepository;
+import com.example.salessync.repository.SupplySheetRepository;
 import com.example.salessync.service.SizeService;
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,15 +24,16 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SizeServiceImpl implements SizeService {
-    private final SheetRepository sheetRepository;
+    private final SupplySheetRepository sheetRepository;
     private final SizeRepository sizeRepository;
-    private final LineRepository lineRepository;
-    private final SheetMapper sheetMapper;
+    private final SupplySheetLineRepository lineRepository;
+    private final SupplySheetMapper sheetMapper;
     private final SizeMapper sizeMapper;
 
     @Override
-    public SheetResponseDto addSize(Long userId, Long sheetId, CreateSizeRequestDto requestDto) {
-        Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
+    public SupplySheetResponseDto addSize(Long userId, Long sheetId,
+                                          CreateSizeRequestDto requestDto) {
+        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
         Optional<String> nameOptional = sheet.getLines().get(0).getSizes().stream()
                 .map(Size::getName)
                 .filter(e -> e.equals(requestDto.name()))
@@ -55,9 +56,9 @@ public class SizeServiceImpl implements SizeService {
     public SizeResponseDto updateSize(
             Long userId, Long sheetId, Long lineId, Long sizeId, Integer number
     ) {
-        Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
 
-        Line line = sheet.getLines().stream()
+        SupplySheetLine line = sheet.getLines().stream()
                 .filter(e -> e.getId().equals(lineId))
                 .findFirst()
                 .orElseThrow(() ->
@@ -84,7 +85,7 @@ public class SizeServiceImpl implements SizeService {
 
     @Override
     public void deleteSize(Long userId, Long sheetId, String sizeName) {
-        Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
         sheet.getLines().forEach(e -> {
             List<Size> sizes = e.getSizes();
             Optional<Size> sizeOptional = sizes.stream()
@@ -102,7 +103,7 @@ public class SizeServiceImpl implements SizeService {
         lineRepository.saveAllAndFlush(sheet.getLines());
     }
 
-    private Sheet getSheetByIdAndUserId(Long sheetId, Long userId) {
+    private SupplySheet getSheetByIdAndUserId(Long sheetId, Long userId) {
         return sheetRepository.findByIdAndUserId(sheetId, userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(
                         "User with ID %s doesn't have a sheet with ID %s", userId, sheetId)));

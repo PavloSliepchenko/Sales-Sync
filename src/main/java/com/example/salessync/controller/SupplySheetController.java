@@ -1,9 +1,9 @@
 package com.example.salessync.controller;
 
-import com.example.salessync.dto.sheet.CreateSheetRequestDto;
-import com.example.salessync.dto.sheet.SheetResponseDto;
+import com.example.salessync.dto.sheet.CreateSupplySheetRequestDto;
+import com.example.salessync.dto.sheet.SupplySheetResponseDto;
 import com.example.salessync.model.User;
-import com.example.salessync.service.SheetService;
+import com.example.salessync.service.SupplySheetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,16 +27,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/sheets")
 @Tag(name = "Sheets management",
         description = "Provides endpoints for CRUD operations with sheets")
-public class SheetController {
-    private final SheetService sheetService;
+public class SupplySheetController {
+    private final SupplySheetService sheetService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a new sheet",
             description = "Allows to add a new sheet. Available to all authenticated users")
-    public SheetResponseDto addSheet(Authentication authentication,
-                                     @Valid @RequestBody CreateSheetRequestDto requestDto) {
+    public SupplySheetResponseDto addSheet(
+            Authentication authentication,
+            @Valid @RequestBody CreateSupplySheetRequestDto requestDto
+    ) {
         User user = (User) authentication.getPrincipal();
         return sheetService.addSheet(user.getId(), requestDto);
     }
@@ -45,7 +47,7 @@ public class SheetController {
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Get all sheets",
             description = "Allows to get all sheets. Available to all authenticated users")
-    public List<SheetResponseDto> getAllUsersSheets(Authentication authentication) {
+    public List<SupplySheetResponseDto> getAllUsersSheets(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return sheetService.getAllSheets(user.getId());
     }
@@ -54,8 +56,8 @@ public class SheetController {
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Get sheet by ID",
             description = "Allows to get sheet by ID. Available to all authenticated users")
-    public SheetResponseDto getSheetById(Authentication authentication,
-                                         @PathVariable Long sheetId) {
+    public SupplySheetResponseDto getSheetById(Authentication authentication,
+                                               @PathVariable Long sheetId) {
         User user = (User) authentication.getPrincipal();
         return sheetService.getSheetById(user.getId(), sheetId);
     }
@@ -64,9 +66,11 @@ public class SheetController {
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Update sheet name",
             description = "Allows to update sheet name. Available to all authenticated users")
-    public SheetResponseDto updateSheetName(Authentication authentication,
-                                            @PathVariable Long sheetId,
-                                            @Valid @RequestBody CreateSheetRequestDto requestDto) {
+    public SupplySheetResponseDto updateSheetName(
+            Authentication authentication,
+            @PathVariable Long sheetId,
+            @Valid @RequestBody CreateSupplySheetRequestDto requestDto
+    ) {
         User user = (User) authentication.getPrincipal();
         return sheetService.updateSheetName(user.getId(), sheetId, requestDto);
     }

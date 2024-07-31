@@ -22,7 +22,7 @@ import org.hibernate.annotations.Where;
 @Table(name = "sheets")
 @Where(clause = "is_deleted = false")
 @SQLDelete(sql = "UPDATE sheets SET is_deleted = true WHERE id = ?")
-public class Sheet {
+public class SupplySheet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +34,7 @@ public class Sheet {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "sheet", fetch = FetchType.EAGER)
-    private List<Line> lines;
+    private List<SupplySheetLine> lines;
     @Column(nullable = false)
     private boolean isDeleted = false;
 }

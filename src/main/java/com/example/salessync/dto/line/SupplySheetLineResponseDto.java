@@ -1,23 +1,23 @@
 package com.example.salessync.dto.line;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.example.salessync.dto.size.SizeResponseDto;
 import java.math.BigDecimal;
+import java.util.List;
 import lombok.Data;
 
 @Data
-public class CreateLineRequestDto {
-    @NotBlank
+public class SupplySheetLineResponseDto {
+    private Long id;
     private String article;
-    @NotBlank
     private String clothType;
-    @NotNull
     private Integer age;
-    @NotBlank
     private String color;
-    @NotNull
     private Integer series;
+    private Integer quantity;
     private BigDecimal price;
+    private Integer totalQuantity;
+    private BigDecimal totalPrice;
     private Integer supply;
     private String brand;
+    private List<SizeResponseDto> sizes;
 }
