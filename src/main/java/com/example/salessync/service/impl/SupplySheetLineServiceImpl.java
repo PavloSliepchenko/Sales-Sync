@@ -1,16 +1,16 @@
 package com.example.salessync.service.impl;
 
-import com.example.salessync.dto.line.CreateLineRequestDto;
-import com.example.salessync.dto.line.LineResponseDto;
+import com.example.salessync.dto.line.CreateSupplySheetLineRequestDto;
+import com.example.salessync.dto.line.SupplySheetLineResponseDto;
 import com.example.salessync.exception.EntityNotFoundException;
-import com.example.salessync.mapper.LineMapper;
-import com.example.salessync.model.Line;
-import com.example.salessync.model.Sheet;
+import com.example.salessync.mapper.SupplySheetLineMapper;
 import com.example.salessync.model.Size;
-import com.example.salessync.repository.LineRepository;
-import com.example.salessync.repository.SheetRepository;
+import com.example.salessync.model.SupplySheet;
+import com.example.salessync.model.SupplySheetLine;
 import com.example.salessync.repository.SizeRepository;
-import com.example.salessync.service.LineService;
+import com.example.salessync.repository.SupplySheetLineRepository;
+import com.example.salessync.repository.SupplySheetRepository;
+import com.example.salessync.service.SupplySheetLineService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +19,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class LineServiceImpl implements LineService {
-    private final SheetRepository sheetRepository;
-    private final LineRepository lineRepository;
+public class SupplySheetLineServiceImpl implements SupplySheetLineService {
+    private final SupplySheetRepository sheetRepository;
+    private final SupplySheetLineRepository lineRepository;
     private final SizeRepository sizeRepository;
-    private final LineMapper lineMapper;
+    private final SupplySheetLineMapper lineMapper;
 
     @Override
-    public LineResponseDto addLine(Long userId, Long sheetId, CreateLineRequestDto requestDto) {
-        Line line = new Line();
+    public SupplySheetLineResponseDto addLine(Long userId,
+                                              Long sheetId,
+                                              CreateSupplySheetLineRequestDto requestDto) {
+        SupplySheetLine line = new SupplySheetLine();
         line.setArticle(requestDto.getArticle());
         line.setClothType(requestDto.getClothType());
         line.setAge(requestDto.getAge());
@@ -37,7 +39,7 @@ public class LineServiceImpl implements LineService {
         line.setSupply(requestDto.getSupply());
         line.setBrand(requestDto.getBrand());
         line.setSizes(new ArrayList<>());
-        Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
         if (sheet.getLines().size() > 0) {
             List<Size> sizeList = line.getSizes();
             sheet.getLines().get(0).getSizes().forEach(e -> {
@@ -52,10 +54,10 @@ public class LineServiceImpl implements LineService {
     }
 
     @Override
-    public LineResponseDto updateLine(
-            Long userId, Long sheetId, Long lineId, CreateLineRequestDto requestDto) {
-        Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
-        Line line = getLine(sheet, lineId);
+    public SupplySheetLineResponseDto updateLine(
+            Long userId, Long sheetId, Long lineId, CreateSupplySheetLineRequestDto requestDto) {
+        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        SupplySheetLine line = getLine(sheet, lineId);
         if (requestDto.getAge() != null) {
             line.setAge(requestDto.getAge());
         }
@@ -94,18 +96,18 @@ public class LineServiceImpl implements LineService {
 
     @Override
     public void deleteLine(Long userId, Long sheetId, Long lineId) {
-        Sheet sheet = getSheetByIdAndUserId(sheetId, userId);
-        Line line = getLine(sheet, lineId);
+        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        SupplySheetLine line = getLine(sheet, lineId);
         lineRepository.delete(line);
     }
 
-    private Sheet getSheetByIdAndUserId(Long sheetId, Long userId) {
+    private SupplySheet getSheetByIdAndUserId(Long sheetId, Long userId) {
         return sheetRepository.findByIdAndUserId(sheetId, userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(
                         "User with ID %s doesn't have a sheet with ID %s", userId, sheetId)));
     }
 
-    private Line getLine(Sheet sheet, Long lineId) {
+    private SupplySheetLine getLine(SupplySheet sheet, Long lineId) {
         return sheet.getLines().stream()
                 .filter(e -> e.getId().equals(lineId))
                 .findFirst()

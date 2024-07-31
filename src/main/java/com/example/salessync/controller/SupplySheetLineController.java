@@ -1,9 +1,9 @@
 package com.example.salessync.controller;
 
-import com.example.salessync.dto.line.CreateLineRequestDto;
-import com.example.salessync.dto.line.LineResponseDto;
+import com.example.salessync.dto.line.CreateSupplySheetLineRequestDto;
+import com.example.salessync.dto.line.SupplySheetLineResponseDto;
 import com.example.salessync.model.User;
-import com.example.salessync.service.LineService;
+import com.example.salessync.service.SupplySheetLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,17 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/lines")
 @Tag(name = "Lines management",
         description = "Provides endpoints for CRUD operations with lines")
-public class LineController {
-    private final LineService lineService;
+public class SupplySheetLineController {
+    private final SupplySheetLineService lineService;
 
     @PostMapping
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a new line",
             description = "Allows to add a new line. Available to all authenticated users")
-    public LineResponseDto addLine(Authentication authentication,
-                                   @RequestParam Long sheetId,
-                                   @Valid @RequestBody CreateLineRequestDto requestDto) {
+    public SupplySheetLineResponseDto addLine(
+            Authentication authentication,
+            @RequestParam Long sheetId,
+            @Valid @RequestBody CreateSupplySheetLineRequestDto requestDto
+    ) {
         User user = (User) authentication.getPrincipal();
         return lineService.addLine(user.getId(), sheetId, requestDto);
     }
@@ -44,10 +46,12 @@ public class LineController {
     @PreAuthorize("hasAuthority('USER')")
     @Operation(summary = "Update line",
             description = "Allows to update (patch) line. Available to all authenticated users")
-    public LineResponseDto updateLine(Authentication authentication,
-                                      @RequestParam Long sheetId,
-                                      @RequestParam Long lineId,
-                                      @RequestBody CreateLineRequestDto requestDto) {
+    public SupplySheetLineResponseDto updateLine(
+            Authentication authentication,
+            @RequestParam Long sheetId,
+            @RequestParam Long lineId,
+            @RequestBody CreateSupplySheetLineRequestDto requestDto
+    ) {
         User user = (User) authentication.getPrincipal();
         return lineService.updateLine(user.getId(), sheetId, lineId, requestDto);
     }

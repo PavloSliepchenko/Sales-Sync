@@ -1,6 +1,6 @@
 package com.example.salessync.controller;
 
-import com.example.salessync.dto.sheet.SheetResponseDto;
+import com.example.salessync.dto.sheet.SupplySheetResponseDto;
 import com.example.salessync.dto.size.CreateSizeRequestDto;
 import com.example.salessync.dto.size.SizeResponseDto;
 import com.example.salessync.model.User;
@@ -36,9 +36,9 @@ public class SizeController {
     @Operation(summary = "Add a new size",
             description = "Allows to add a new size to all lines on the sheet. "
                     + "Available to all authenticated users")
-    public SheetResponseDto addSize(Authentication authentication,
-                                    @RequestParam Long sheetId,
-                                    @Valid @RequestBody CreateSizeRequestDto requestDto) {
+    public SupplySheetResponseDto addSize(Authentication authentication,
+                                          @RequestParam Long sheetId,
+                                          @Valid @RequestBody CreateSizeRequestDto requestDto) {
         User user = (User) authentication.getPrincipal();
         return sizeService.addSize(user.getId(), sheetId, requestDto);
     }
