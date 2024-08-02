@@ -4,7 +4,7 @@ import com.example.salessync.dto.sheet.SupplySheetResponseDto;
 import java.util.List;
 
 public interface SupplySheetService {
-    SupplySheetResponseDto addSheet(Long userId, String name);
+    SupplySheetResponseDto addSheet(Long userId);
 
     List<SupplySheetResponseDto> getAllSheets(Long userId);
 

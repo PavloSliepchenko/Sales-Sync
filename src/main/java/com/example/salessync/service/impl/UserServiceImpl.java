@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private static final String SUPPLY = "Supply";
     private static final User.Role DEFAULT_ROLE = User.Role.USER;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SupplySheetService supplySheetService;
@@ -33,7 +32,7 @@ public class UserServiceImpl implements UserService {
         user.setRole(DEFAULT_ROLE);
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         user = userRepository.save(user);
-        supplySheetService.addSheet(user.getId(), SUPPLY);
+        supplySheetService.addSheet(user.getId());
         return userMapper.toDto(user);
     }
 

@@ -19,10 +19,10 @@ import org.hibernate.annotations.Where;
 
 @Data
 @Entity
-@Table(name = "supply_sheets")
+@Table(name = "delivery_sheet")
 @Where(clause = "is_deleted = false")
-@SQLDelete(sql = "UPDATE supply_sheets SET is_deleted = true WHERE id = ?")
-public class SupplySheet {
+@SQLDelete(sql = "UPDATE delivery_sheet SET is_deleted = true WHERE id = ?")
+public class DeliverySheet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +34,7 @@ public class SupplySheet {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "sheet", fetch = FetchType.EAGER)
-    private List<SupplySheetLine> lines;
+    private List<DeliverySheetLine> lines;
     @Column(nullable = false)
     private boolean isDeleted = false;
 }

@@ -18,23 +18,23 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SupplySheetServiceImpl implements SupplySheetService {
+    private static final String SUPPLY = "Supply";
     private final SupplySheetRepository sheetRepository;
     private final UserRepository userRepository;
     private final SupplySheetMapper sheetMapper;
 
     @Override
-    public SupplySheetResponseDto addSheet(Long userId, String name) {
-        Optional<SupplySheet> sheetOptional =
-                sheetRepository.findByNameAndUserId(name, userId);
+    public SupplySheetResponseDto addSheet(Long userId) {
+        Optional<SupplySheet> sheetOptional = sheetRepository.findByUserId(userId);
         if (sheetOptional.isPresent()) {
             throw new EntityAlreadyExistsException(String.format(
-                    "Sheet with name %s already exists", name));
+                    "Sheet with name %s already exists", SUPPLY));
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("There is no user with ID " + userId));
         SupplySheet sheet = new SupplySheet();
-        sheet.setName(name);
+        sheet.setName(SUPPLY);
         sheet.setUser(user);
         sheet.setLines(new ArrayList<>());
         return sheetMapper.toDto(sheetRepository.save(sheet));
