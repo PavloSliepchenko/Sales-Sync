@@ -6,6 +6,7 @@ import com.example.salessync.exception.RegistrationException;
 import com.example.salessync.mapper.UserMapper;
 import com.example.salessync.model.User;
 import com.example.salessync.repository.UserRepository;
+import com.example.salessync.service.SupplySheetService;
 import com.example.salessync.service.UserService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private static final String SUPPLY = "Supply";
     private static final User.Role DEFAULT_ROLE = User.Role.USER;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final SupplySheetService supplySheetService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -29,7 +32,9 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toModel(requestDto);
         user.setRole(DEFAULT_ROLE);
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-        return userMapper.toDto(userRepository.save(user));
+        user = userRepository.save(user);
+        supplySheetService.addSheet(user.getId(), SUPPLY);
+        return userMapper.toDto(user);
     }
 
     private Optional<User> findUserByEmail(String email) {

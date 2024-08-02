@@ -1,6 +1,5 @@
 package com.example.salessync.service.impl;
 
-import com.example.salessync.dto.sheet.CreateSupplySheetRequestDto;
 import com.example.salessync.dto.sheet.SupplySheetResponseDto;
 import com.example.salessync.exception.EntityAlreadyExistsException;
 import com.example.salessync.exception.EntityNotFoundException;
@@ -24,18 +23,18 @@ public class SupplySheetServiceImpl implements SupplySheetService {
     private final SupplySheetMapper sheetMapper;
 
     @Override
-    public SupplySheetResponseDto addSheet(Long userId, CreateSupplySheetRequestDto requestDto) {
+    public SupplySheetResponseDto addSheet(Long userId, String name) {
         Optional<SupplySheet> sheetOptional =
-                sheetRepository.findByNameAndUserId(requestDto.name(), userId);
+                sheetRepository.findByNameAndUserId(name, userId);
         if (sheetOptional.isPresent()) {
             throw new EntityAlreadyExistsException(String.format(
-                    "Sheet with name %s already exists", requestDto.name()));
+                    "Sheet with name %s already exists", name));
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("There is no user with ID " + userId));
         SupplySheet sheet = new SupplySheet();
-        sheet.setName(requestDto.name());
+        sheet.setName(name);
         sheet.setUser(user);
         sheet.setLines(new ArrayList<>());
         return sheetMapper.toDto(sheetRepository.save(sheet));
@@ -51,20 +50,6 @@ public class SupplySheetServiceImpl implements SupplySheetService {
     @Override
     public SupplySheetResponseDto getSheetById(Long userId, Long sheetId) {
         return sheetMapper.toDto(getSheetByIdAndUserId(sheetId, userId));
-    }
-
-    @Override
-    public SupplySheetResponseDto updateSheetName(
-            Long userId, Long sheetId, CreateSupplySheetRequestDto requestDto) {
-        Optional<SupplySheet> sheetOptional =
-                sheetRepository.findByNameAndUserId(requestDto.name(), userId);
-        if (sheetOptional.isPresent()) {
-            throw new EntityAlreadyExistsException(String.format(
-                    "Sheet with name %s already exists", requestDto.name()));
-        }
-        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
-        sheet.setName(requestDto.name());
-        return sheetMapper.toDto(sheetRepository.save(sheet));
     }
 
     @Override
