@@ -20,26 +20,17 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SupplySheetLineServiceImpl implements SupplySheetLineService {
-    private final SupplySheetRepository sheetRepository;
     private final SupplySheetLineRepository lineRepository;
-    private final SizeRepository sizeRepository;
+    private final SupplySheetRepository sheetRepository;
     private final SupplySheetLineMapper lineMapper;
+    private final SizeRepository sizeRepository;
 
     @Override
     public SupplySheetLineResponseDto addLine(Long userId,
-                                              Long sheetId,
                                               CreateSupplySheetLineRequestDto requestDto) {
-        SupplySheetLine line = new SupplySheetLine();
-        line.setArticle(requestDto.getArticle());
-        line.setClothType(requestDto.getClothType());
-        line.setAge(requestDto.getAge());
-        line.setColor(requestDto.getColor());
-        line.setSeries(requestDto.getSeries());
-        line.setPrice(requestDto.getPrice());
-        line.setSupply(requestDto.getSupply());
-        line.setBrand(requestDto.getBrand());
+        SupplySheetLine line = lineMapper.toModel(requestDto);
         line.setSizes(new ArrayList<>());
-        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        SupplySheet sheet = getSheetByUserId(userId);
         if (sheet.getLines().size() > 0) {
             List<Size> sizeList = line.getSizes();
             sheet.getLines().get(0).getSizes().forEach(e -> {
@@ -55,8 +46,8 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
 
     @Override
     public SupplySheetLineResponseDto updateLine(
-            Long userId, Long sheetId, Long lineId, CreateSupplySheetLineRequestDto requestDto) {
-        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
+            Long userId, Long lineId, CreateSupplySheetLineRequestDto requestDto) {
+        SupplySheet sheet = getSheetByUserId(userId);
         SupplySheetLine line = getLine(sheet, lineId);
         if (requestDto.getAge() != null) {
             line.setAge(requestDto.getAge());
@@ -95,16 +86,16 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
     }
 
     @Override
-    public void deleteLine(Long userId, Long sheetId, Long lineId) {
-        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
+    public void deleteLine(Long userId, Long lineId) {
+        SupplySheet sheet = getSheetByUserId(userId);
         SupplySheetLine line = getLine(sheet, lineId);
         lineRepository.delete(line);
     }
 
-    private SupplySheet getSheetByIdAndUserId(Long sheetId, Long userId) {
-        return sheetRepository.findByIdAndUserId(sheetId, userId)
+    private SupplySheet getSheetByUserId(Long userId) {
+        return sheetRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(
-                        "User with ID %s doesn't have a sheet with ID %s", userId, sheetId)));
+                        "User with ID %s doesn't have a supply sheet", userId)));
     }
 
     private SupplySheetLine getLine(SupplySheet sheet, Long lineId) {

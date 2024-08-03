@@ -6,6 +6,7 @@ import com.example.salessync.exception.RegistrationException;
 import com.example.salessync.mapper.UserMapper;
 import com.example.salessync.model.User;
 import com.example.salessync.repository.UserRepository;
+import com.example.salessync.service.DeliverySheetService;
 import com.example.salessync.service.SupplySheetService;
 import com.example.salessync.service.UserService;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private static final User.Role DEFAULT_ROLE = User.Role.USER;
+    private final DeliverySheetService deliverySheetService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SupplySheetService supplySheetService;
     private final UserRepository userRepository;
@@ -33,6 +35,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         user = userRepository.save(user);
         supplySheetService.addSheet(user.getId());
+        deliverySheetService.addSheet(user.getId());
         return userMapper.toDto(user);
     }
 
