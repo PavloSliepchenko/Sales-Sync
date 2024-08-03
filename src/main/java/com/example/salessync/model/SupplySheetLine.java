@@ -21,9 +21,9 @@ import org.hibernate.annotations.Where;
 
 @Data
 @Entity
-@Table(name = "lines")
+@Table(name = "supply_sheet_lines")
 @Where(clause = "is_deleted = false")
-@SQLDelete(sql = "UPDATE lines SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE supply_sheet_lines SET is_deleted = true WHERE id = ?")
 public class SupplySheetLine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

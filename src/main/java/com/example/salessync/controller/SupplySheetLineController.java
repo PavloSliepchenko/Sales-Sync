@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/lines")
+@RequestMapping(value = "/supplyLines")
 @Tag(name = "Lines management",
         description = "Provides endpoints for CRUD operations with lines")
 public class SupplySheetLineController {
@@ -35,11 +35,10 @@ public class SupplySheetLineController {
             description = "Allows to add a new line. Available to all authenticated users")
     public SupplySheetLineResponseDto addLine(
             Authentication authentication,
-            @RequestParam Long sheetId,
             @Valid @RequestBody CreateSupplySheetLineRequestDto requestDto
     ) {
         User user = (User) authentication.getPrincipal();
-        return lineService.addLine(user.getId(), sheetId, requestDto);
+        return lineService.addLine(user.getId(), requestDto);
     }
 
     @PatchMapping
@@ -48,12 +47,11 @@ public class SupplySheetLineController {
             description = "Allows to update (patch) line. Available to all authenticated users")
     public SupplySheetLineResponseDto updateLine(
             Authentication authentication,
-            @RequestParam Long sheetId,
             @RequestParam Long lineId,
             @RequestBody CreateSupplySheetLineRequestDto requestDto
     ) {
         User user = (User) authentication.getPrincipal();
-        return lineService.updateLine(user.getId(), sheetId, lineId, requestDto);
+        return lineService.updateLine(user.getId(), lineId, requestDto);
     }
 
     @DeleteMapping
@@ -62,9 +60,8 @@ public class SupplySheetLineController {
     @Operation(summary = "Delete line by ID",
             description = "Allows to delete line by ID. Available to all authenticated users")
     public void deleteLine(Authentication authentication,
-                           @RequestParam Long sheetId,
                            @RequestParam Long lineId) {
         User user = (User) authentication.getPrincipal();
-        lineService.deleteLine(user.getId(), sheetId, lineId);
+        lineService.deleteLine(user.getId(), lineId);
     }
 }
