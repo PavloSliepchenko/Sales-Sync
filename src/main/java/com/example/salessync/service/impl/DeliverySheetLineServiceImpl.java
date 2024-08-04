@@ -40,9 +40,10 @@ public class DeliverySheetLineServiceImpl implements DeliverySheetLineService {
             SupplySheetLine supplySheetLine = supplySheetLineOptional.get();
             line.setSupply(supplySheetLine.getSupply());
         }
-        line.setTotalPriceUsd(line.getPriceUsd()
-                .multiply(BigDecimal.valueOf(line.getWeight()))
-                .multiply(line.getAdditionalPriceUsd()));
+        line.setTotalPriceUsd(line.getPriceUsd().multiply(BigDecimal.valueOf(line.getWeight())));
+        if (line.getAdditionalPriceUsd() != null) {
+            line.setTotalPriceUsd(line.getPriceUsd().add(line.getAdditionalPriceUsd()));
+        }
         line.setDeliveryPricePerUnitUsd(line.getTotalPriceUsd()
                 .divide(BigDecimal.valueOf(line.getSupply()), 2, RoundingMode.HALF_UP));
         if (line.getSupply() != null && line.getSupply() > 0) {
@@ -50,8 +51,8 @@ public class DeliverySheetLineServiceImpl implements DeliverySheetLineService {
                     .divide(BigDecimal.valueOf(line.getSupply()), 2, RoundingMode.HALF_UP));
         }
         line.setAveragePriceLocal(line.getDeliveryPricePerUnitUsd()
-                .multiply(line.getCurrency()
-                        .add(line.getDeliveryPricePerUnitLocal())));
+                .multiply(line.getCurrency())
+                .add(line.getDeliveryPricePerUnitLocal()));
         DeliverySheet sheet = getSheetByUserId(userId);
         line.setSheet(sheet);
         return lineMapper.toDto(lineRepository.save(line));
@@ -116,12 +117,12 @@ public class DeliverySheetLineServiceImpl implements DeliverySheetLineService {
     private DeliverySheetLine updateLineData(DeliverySheetLine line) {
         line.setTotalPriceUsd(line.getPriceUsd()
                 .multiply(BigDecimal.valueOf(line.getWeight()))
-                .multiply(line.getAdditionalPriceUsd()));
+                .add(line.getAdditionalPriceUsd()));
         line.setDeliveryPricePerUnitUsd(line.getTotalPriceUsd()
                 .divide(BigDecimal.valueOf(line.getSupply()), 2, RoundingMode.HALF_UP));
-        line.setAveragePriceLocal(line.getDeliveryPricePerUnitUsd()
-                .multiply(line.getCurrency()
-                        .add(line.getDeliveryPricePerUnitLocal())));
+        line.setAveragePriceLocal((line.getDeliveryPricePerUnitUsd()
+                .multiply(line.getCurrency()))
+                .add(line.getDeliveryPricePerUnitLocal()));
         return line;
     }
 }
