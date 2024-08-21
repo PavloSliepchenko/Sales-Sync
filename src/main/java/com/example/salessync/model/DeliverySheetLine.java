@@ -27,9 +27,7 @@ public class DeliverySheetLine {
     @Column(nullable = false)
     private String article;
     private String deliveryDate;
-    @Column(nullable = false)
     private int weight;
-    @Column(nullable = false)
     private BigDecimal priceUsd;
     private BigDecimal additionalPriceUsd;
     private BigDecimal deliveryPriceLocal;

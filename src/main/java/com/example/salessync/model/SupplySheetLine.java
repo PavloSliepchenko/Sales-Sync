@@ -33,7 +33,7 @@ public class SupplySheetLine {
     @Column(nullable = false)
     private String clothType;
     @Column(nullable = false)
-    private Integer age;
+    private String age;
     @Column(nullable = false)
     private String color;
     @Column(nullable = false)
