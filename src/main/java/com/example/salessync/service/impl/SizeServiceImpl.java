@@ -34,21 +34,23 @@ public class SizeServiceImpl implements SizeService {
     public SupplySheetResponseDto addSize(Long userId, Long sheetId,
                                           CreateSizeRequestDto requestDto) {
         SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
-        Optional<String> nameOptional = sheet.getLines().get(0).getSizes().stream()
-                .map(Size::getName)
-                .filter(e -> e.equals(requestDto.name()))
+        Optional<Size> sizeOptional = sizeRepository.findAll().stream()
+                .filter(e -> e.getName().equals(requestDto.name()))
                 .findFirst();
-        if (nameOptional.isPresent()) {
+        if (sizeOptional.isPresent()) {
             throw new EntityAlreadyExistsException("This size was added before");
         }
-        sheet.getLines().forEach(e -> {
-            List<Size> sizes = e.getSizes();
-            Size size = new Size();
-            size.setName(requestDto.name());
-            sizeRepository.save(size);
-            sizes.add(size);
-        });
-        lineRepository.saveAllAndFlush(sheet.getLines());
+        if (sheet.getLines().size() > 0) {
+            sheet.getLines().forEach(e -> {
+                List<Size> sizes = e.getSizes();
+                Size size = sizeMapper.toModel(requestDto);
+                sizeRepository.save(size);
+                sizes.add(size);
+            });
+            lineRepository.saveAllAndFlush(sheet.getLines());
+        } else {
+            sizeRepository.save(sizeMapper.toModel(requestDto));
+        }
         return sheetMapper.toDto(sheetRepository.save(sheet));
     }
 
