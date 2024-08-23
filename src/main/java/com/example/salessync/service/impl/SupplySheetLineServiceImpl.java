@@ -55,9 +55,13 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
                     sizeList.add(size);
                     sizeRepository.save(size);
                 });
+            } else {
+                List<Size> sizes = sizeRepository.findAll();
+                line.setSizes(sizes);
             }
             line.setSheet(sheet);
             line = supplyLineRepository.save(line);
+            sheet.getLines().add(line);
             if (requestDto.getSizes() != null) {
                 for (UpdateSizeRequestDto sizeDto : requestDto.getSizes()) {
                     Size size = line.getSizes().stream()
@@ -120,6 +124,7 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
         }
         if (requestDto.getSupply() != null) {
             line.setSupply(requestDto.getSupply());
+            deliverySheetLineService.updateSupply(userId, lineId, requestDto.getSupply());
         }
         if (requestDto.getClothType() != null) {
             line.setClothType(requestDto.getClothType());
@@ -161,7 +166,7 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
             line.setPrice(requestDto.getPrice());
             line = updateLineData(line);
         }
-        return lineMapper.toDto(line);
+        return lineMapper.toDto(supplyLineRepository.save(line));
     }
 
     @Override
