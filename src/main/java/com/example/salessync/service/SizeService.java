@@ -5,9 +5,9 @@ import com.example.salessync.dto.size.CreateSizeRequestDto;
 import com.example.salessync.dto.size.SizeResponseDto;
 
 public interface SizeService {
-    SupplySheetResponseDto addSize(Long userId, Long sheetId, CreateSizeRequestDto requestDto);
+    SupplySheetResponseDto addSize(Long userId, CreateSizeRequestDto requestDto);
 
-    SizeResponseDto updateSize(Long userId, Long sheetId, Long lineId, Long sizeId, Integer number);
+    SizeResponseDto updateSize(Long userId, Long lineId, Long sizeId, Integer number);
 
-    void deleteSize(Long userId, Long sheetId, String sizeName);
+    void deleteSize(Long userId, String sizeName);
 }

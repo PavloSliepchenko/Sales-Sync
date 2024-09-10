@@ -10,9 +10,11 @@ import com.example.salessync.mapper.SupplySheetMapper;
 import com.example.salessync.model.Size;
 import com.example.salessync.model.SupplySheet;
 import com.example.salessync.model.SupplySheetLine;
+import com.example.salessync.model.User;
 import com.example.salessync.repository.SizeRepository;
 import com.example.salessync.repository.SupplySheetLineRepository;
 import com.example.salessync.repository.SupplySheetRepository;
+import com.example.salessync.repository.UserRepository;
 import com.example.salessync.service.SizeService;
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,41 +26,47 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SizeServiceImpl implements SizeService {
+    private final SupplySheetLineRepository lineRepository;
     private final SupplySheetRepository sheetRepository;
     private final SizeRepository sizeRepository;
-    private final SupplySheetLineRepository lineRepository;
+    private final UserRepository userRepository;
     private final SupplySheetMapper sheetMapper;
     private final SizeMapper sizeMapper;
 
     @Override
-    public SupplySheetResponseDto addSize(Long userId, Long sheetId,
-                                          CreateSizeRequestDto requestDto) {
-        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
-        Optional<Size> sizeOptional = sizeRepository.findAll().stream()
+    public SupplySheetResponseDto addSize(Long userId, CreateSizeRequestDto requestDto) {
+        SupplySheet sheet = getSheetByUserId(userId);
+        Optional<Size> sizeOptional = sizeRepository.findAllByUserId(userId).stream()
                 .filter(e -> e.getName().equals(requestDto.name()))
                 .findFirst();
         if (sizeOptional.isPresent()) {
             throw new EntityAlreadyExistsException("This size was added before");
         }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("There is no user with id " + userId));
         if (sheet.getLines().size() > 0) {
             sheet.getLines().forEach(e -> {
                 List<Size> sizes = e.getSizes();
                 Size size = sizeMapper.toModel(requestDto);
+                size.setUser(user);
                 sizeRepository.save(size);
                 sizes.add(size);
             });
             lineRepository.saveAllAndFlush(sheet.getLines());
         } else {
-            sizeRepository.save(sizeMapper.toModel(requestDto));
+            Size size = sizeMapper.toModel(requestDto);
+            size.setUser(user);
+            sizeRepository.save(size);
         }
         return sheetMapper.toDto(sheetRepository.save(sheet));
     }
 
     @Override
     public SizeResponseDto updateSize(
-            Long userId, Long sheetId, Long lineId, Long sizeId, Integer number
+            Long userId, Long lineId, Long sizeId, Integer number
     ) {
-        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
+        SupplySheet sheet = getSheetByUserId(userId);
 
         SupplySheetLine line = sheet.getLines().stream()
                 .filter(e -> e.getId().equals(lineId))
@@ -86,8 +94,8 @@ public class SizeServiceImpl implements SizeService {
     }
 
     @Override
-    public void deleteSize(Long userId, Long sheetId, String sizeName) {
-        SupplySheet sheet = getSheetByIdAndUserId(sheetId, userId);
+    public void deleteSize(Long userId, String sizeName) {
+        SupplySheet sheet = getSheetByUserId(userId);
         sheet.getLines().forEach(e -> {
             List<Size> sizes = e.getSizes();
             Optional<Size> sizeOptional = sizes.stream()
@@ -105,9 +113,9 @@ public class SizeServiceImpl implements SizeService {
         lineRepository.saveAllAndFlush(sheet.getLines());
     }
 
-    private SupplySheet getSheetByIdAndUserId(Long sheetId, Long userId) {
-        return sheetRepository.findByIdAndUserId(sheetId, userId)
+    private SupplySheet getSheetByUserId(Long userId) {
+        return sheetRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format(
-                        "User with ID %s doesn't have a sheet with ID %s", userId, sheetId)));
+                        "User with ID %s doesn't have a supply sheet", userId)));
     }
 }

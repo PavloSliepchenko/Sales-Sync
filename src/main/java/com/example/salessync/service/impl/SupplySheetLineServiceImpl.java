@@ -4,19 +4,23 @@ import com.example.salessync.dto.line.CreateDeliverySheetLineRequestDto;
 import com.example.salessync.dto.line.CreateSupplySheetLineRequestDto;
 import com.example.salessync.dto.line.SupplySheetLineResponseDto;
 import com.example.salessync.dto.size.UpdateSizeRequestDto;
+import com.example.salessync.exception.EntityAlreadyExistsException;
 import com.example.salessync.exception.EntityNotFoundException;
 import com.example.salessync.mapper.SupplySheetLineMapper;
 import com.example.salessync.model.Size;
 import com.example.salessync.model.SupplySheet;
 import com.example.salessync.model.SupplySheetLine;
+import com.example.salessync.model.User;
 import com.example.salessync.repository.SizeRepository;
 import com.example.salessync.repository.SupplySheetLineRepository;
 import com.example.salessync.repository.SupplySheetRepository;
+import com.example.salessync.repository.UserRepository;
 import com.example.salessync.service.DeliverySheetLineService;
 import com.example.salessync.service.SizeService;
 import com.example.salessync.service.SupplySheetLineService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -30,33 +34,44 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
     private final SupplySheetRepository sheetRepository;
     private final SupplySheetLineMapper lineMapper;
     private final SizeRepository sizeRepository;
+    private final UserRepository userRepository;
     private final SizeService sizeService;
 
     @Override
     public SupplySheetLineResponseDto addLine(Long userId,
                                               CreateSupplySheetLineRequestDto requestDto) {
+        List<Size> sizes = sizeRepository.findAllByUserId(userId);
+        boolean hasAllSizes = checkSizes(sizes, requestDto);
+        if (!hasAllSizes) {
+            throw new EntityAlreadyExistsException("Some sizes were not added yet");
+        }
+        SupplySheet sheet = getSheetByUserId(userId);
         Optional<SupplySheetLine> optionalSupplySheetLine =
-                supplyLineRepository.findByArticleAndAgeAndClothTypeAndColorAndBrand(
+                supplyLineRepository.findByArticleAndAgeAndClothTypeAndColorAndBrandAndSheetId(
                         requestDto.getArticle(),
                         requestDto.getAge(),
                         requestDto.getClothType(),
                         requestDto.getColor(),
-                        requestDto.getBrand()
+                        requestDto.getBrand(),
+                        sheet.getId()
                 );
         if (optionalSupplySheetLine.isEmpty()) {
             SupplySheetLine line = lineMapper.toModel(requestDto);
             line.setSizes(new ArrayList<>());
-            SupplySheet sheet = getSheetByUserId(userId);
             if (sheet.getLines().size() > 0) {
                 List<Size> sizeList = line.getSizes();
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() ->
+                                        new EntityNotFoundException(
+                                                "There is no user with id " + userId));
                 sheet.getLines().get(0).getSizes().forEach(e -> {
                     Size size = new Size();
                     size.setName(e.getName());
+                    size.setUser(user);
                     sizeList.add(size);
                     sizeRepository.save(size);
                 });
             } else {
-                List<Size> sizes = sizeRepository.findAll();
                 line.setSizes(sizes);
             }
             line.setSheet(sheet);
@@ -73,7 +88,6 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
                                                     sizeDto.getName())));
                     sizeService.updateSize(
                             userId,
-                            sheet.getId(),
                             line.getId(),
                             size.getId(),
                             sizeDto.getNumber()
@@ -151,7 +165,6 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
                                                 sizeDto.getName())));
                 sizeService.updateSize(
                         line.getSheet().getUser().getId(),
-                        line.getSheet().getId(),
                         line.getId(),
                         size.getId(),
                         sizeDto.getNumber() + (size.getNumber() == null ? 0 : size.getNumber())
@@ -174,6 +187,17 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
         SupplySheet sheet = getSheetByUserId(userId);
         SupplySheetLine line = getLine(sheet, lineId);
         supplyLineRepository.delete(line);
+    }
+
+    private boolean checkSizes(List<Size> sizes, CreateSupplySheetLineRequestDto requestDto) {
+        List<String> existingSizeNames = sizes.stream()
+                .map(Size::getName)
+                .toList();
+
+        List<String> dtoSizeNames = requestDto.getSizes().stream()
+                .map(UpdateSizeRequestDto::getName)
+                .toList();
+        return new HashSet<>(existingSizeNames).containsAll(dtoSizeNames);
     }
 
     private SupplySheet getSheetByUserId(Long userId) {
