@@ -37,10 +37,9 @@ public class SizeController {
             description = "Allows to add a new size to all lines on the sheet. "
                     + "Available to all authenticated users")
     public SupplySheetResponseDto addSize(Authentication authentication,
-                                          @RequestParam Long sheetId,
                                           @Valid @RequestBody CreateSizeRequestDto requestDto) {
         User user = (User) authentication.getPrincipal();
-        return sizeService.addSize(user.getId(), sheetId, requestDto);
+        return sizeService.addSize(user.getId(), requestDto);
     }
 
     @PutMapping(value = "/{value}")
@@ -49,12 +48,11 @@ public class SizeController {
             description = "Allows to update a specific size value. "
                     + "Available to all authenticated users")
     public SizeResponseDto updateSize(Authentication authentication,
-                                      @RequestParam Long sheetId,
                                       @RequestParam Long lineId,
                                       @RequestParam Long sizeId,
                                       @PathVariable Integer value) {
         User user = (User) authentication.getPrincipal();
-        return sizeService.updateSize(user.getId(), sheetId, lineId, sizeId, value);
+        return sizeService.updateSize(user.getId(), lineId, sizeId, value);
     }
 
     @DeleteMapping
@@ -64,9 +62,8 @@ public class SizeController {
             description = "Allows to delete a specific size from all lines on a chosen sheet. "
                     + "Available to all authenticated users")
     public void deleteSize(Authentication authentication,
-                           @RequestParam Long sheetId,
                            @RequestParam String sizeName) {
         User user = (User) authentication.getPrincipal();
-        sizeService.deleteSize(user.getId(), sheetId, sizeName);
+        sizeService.deleteSize(user.getId(), sizeName);
     }
 }
