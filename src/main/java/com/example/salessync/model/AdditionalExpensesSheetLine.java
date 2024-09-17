@@ -33,7 +33,7 @@ public class AdditionalExpensesSheetLine {
             joinColumns = @JoinColumn(name = "line_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "cell_id", referencedColumnName = "id")
     )
-    private List<AdditionalExpensesSheetCell> cells;
+    private List<Cell> cells;
     @ManyToOne
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

@@ -1,17 +1,17 @@
 package com.example.salessync.service.impl;
 
+import com.example.salessync.dto.cell.UpdateCellRequestDto;
 import com.example.salessync.dto.line.CreateDeliverySheetLineRequestDto;
 import com.example.salessync.dto.line.CreateSupplySheetLineRequestDto;
 import com.example.salessync.dto.line.SupplySheetLineResponseDto;
-import com.example.salessync.dto.size.UpdateSizeRequestDto;
 import com.example.salessync.exception.EntityAlreadyExistsException;
 import com.example.salessync.exception.EntityNotFoundException;
 import com.example.salessync.mapper.SupplySheetLineMapper;
-import com.example.salessync.model.Size;
+import com.example.salessync.model.Cell;
 import com.example.salessync.model.SupplySheet;
 import com.example.salessync.model.SupplySheetLine;
 import com.example.salessync.model.User;
-import com.example.salessync.repository.SizeRepository;
+import com.example.salessync.repository.CellRepository;
 import com.example.salessync.repository.SupplySheetLineRepository;
 import com.example.salessync.repository.SupplySheetRepository;
 import com.example.salessync.repository.UserRepository;
@@ -29,18 +29,19 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SupplySheetLineServiceImpl implements SupplySheetLineService {
+    private static final Cell.CellType SIZE = Cell.CellType.SIZE;
     private final DeliverySheetLineService deliverySheetLineService;
     private final SupplySheetLineRepository supplyLineRepository;
     private final SupplySheetRepository sheetRepository;
     private final SupplySheetLineMapper lineMapper;
-    private final SizeRepository sizeRepository;
+    private final CellRepository cellRepository;
     private final UserRepository userRepository;
     private final SizeService sizeService;
 
     @Override
     public SupplySheetLineResponseDto addLine(Long userId,
                                               CreateSupplySheetLineRequestDto requestDto) {
-        List<Size> sizes = sizeRepository.findAllByUserId(userId);
+        List<Cell> sizes = cellRepository.findAllByUserIdAndCellType(userId, SIZE);
         boolean hasAllSizes = checkSizes(sizes, requestDto);
         if (!hasAllSizes) {
             throw new EntityAlreadyExistsException("Some sizes were not added yet");
@@ -59,17 +60,18 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
             SupplySheetLine line = lineMapper.toModel(requestDto);
             line.setSizes(new ArrayList<>());
             if (sheet.getLines().size() > 0) {
-                List<Size> sizeList = line.getSizes();
+                List<Cell> sizeList = line.getSizes();
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() ->
                                         new EntityNotFoundException(
                                                 "There is no user with id " + userId));
                 sheet.getLines().get(0).getSizes().forEach(e -> {
-                    Size size = new Size();
+                    Cell size = new Cell();
                     size.setName(e.getName());
                     size.setUser(user);
+                    size.setCellType(SIZE);
                     sizeList.add(size);
-                    sizeRepository.save(size);
+                    cellRepository.save(size);
                 });
             } else {
                 line.setSizes(sizes);
@@ -78,8 +80,8 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
             line = supplyLineRepository.save(line);
             sheet.getLines().add(line);
             if (requestDto.getSizes() != null) {
-                for (UpdateSizeRequestDto sizeDto : requestDto.getSizes()) {
-                    Size size = line.getSizes().stream()
+                for (UpdateCellRequestDto sizeDto : requestDto.getSizes()) {
+                    Cell size = line.getSizes().stream()
                             .filter(s -> s.getName().equals(sizeDto.getName()))
                             .findFirst()
                             .orElseThrow(() ->
@@ -90,7 +92,7 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
                             userId,
                             line.getId(),
                             size.getId(),
-                            sizeDto.getNumber()
+                            sizeDto.getValue()
                     );
                 }
             }
@@ -155,8 +157,8 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
                     line.getSheet().getUser().getId(), line.getId(), newSupply);
         }
         if (requestDto.getSizes() != null) {
-            for (UpdateSizeRequestDto sizeDto : requestDto.getSizes()) {
-                Size size = line.getSizes().stream()
+            for (UpdateCellRequestDto sizeDto : requestDto.getSizes()) {
+                Cell size = line.getSizes().stream()
                         .filter(s -> s.getName().equals(sizeDto.getName()))
                         .findFirst()
                         .orElseThrow(() ->
@@ -167,7 +169,7 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
                         line.getSheet().getUser().getId(),
                         line.getId(),
                         size.getId(),
-                        sizeDto.getNumber() + (size.getNumber() == null ? 0 : size.getNumber())
+                        sizeDto.getValue() + (size.getValue() == null ? 0 : size.getValue())
                 );
             }
         }
@@ -189,13 +191,13 @@ public class SupplySheetLineServiceImpl implements SupplySheetLineService {
         supplyLineRepository.delete(line);
     }
 
-    private boolean checkSizes(List<Size> sizes, CreateSupplySheetLineRequestDto requestDto) {
+    private boolean checkSizes(List<Cell> sizes, CreateSupplySheetLineRequestDto requestDto) {
         List<String> existingSizeNames = sizes.stream()
-                .map(Size::getName)
+                .map(Cell::getName)
                 .toList();
 
         List<String> dtoSizeNames = requestDto.getSizes().stream()
-                .map(UpdateSizeRequestDto::getName)
+                .map(UpdateCellRequestDto::getName)
                 .toList();
         return new HashSet<>(existingSizeNames).containsAll(dtoSizeNames);
     }

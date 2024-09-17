@@ -1,13 +1,13 @@
 package com.example.salessync.service;
 
+import com.example.salessync.dto.cell.CellResponseDto;
+import com.example.salessync.dto.cell.CreateCellRequestDto;
 import com.example.salessync.dto.sheet.SupplySheetResponseDto;
-import com.example.salessync.dto.size.CreateSizeRequestDto;
-import com.example.salessync.dto.size.SizeResponseDto;
 
 public interface SizeService {
-    SupplySheetResponseDto addSize(Long userId, CreateSizeRequestDto requestDto);
+    SupplySheetResponseDto addSize(Long userId, CreateCellRequestDto requestDto);
 
-    SizeResponseDto updateSize(Long userId, Long lineId, Long sizeId, Integer number);
+    CellResponseDto updateSize(Long userId, Long lineId, Long sizeId, Integer number);
 
     void deleteSize(Long userId, String sizeName);
 }

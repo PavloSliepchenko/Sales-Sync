@@ -1,8 +1,8 @@
 package com.example.salessync.controller;
 
+import com.example.salessync.dto.cell.CellResponseDto;
+import com.example.salessync.dto.cell.CreateCellRequestDto;
 import com.example.salessync.dto.sheet.SupplySheetResponseDto;
-import com.example.salessync.dto.size.CreateSizeRequestDto;
-import com.example.salessync.dto.size.SizeResponseDto;
 import com.example.salessync.model.User;
 import com.example.salessync.service.SizeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +37,7 @@ public class SizeController {
             description = "Allows to add a new size to all lines on the sheet. "
                     + "Available to all authenticated users")
     public SupplySheetResponseDto addSize(Authentication authentication,
-                                          @Valid @RequestBody CreateSizeRequestDto requestDto) {
+                                          @Valid @RequestBody CreateCellRequestDto requestDto) {
         User user = (User) authentication.getPrincipal();
         return sizeService.addSize(user.getId(), requestDto);
     }
@@ -47,7 +47,7 @@ public class SizeController {
     @Operation(summary = "Update size value",
             description = "Allows to update a specific size value. "
                     + "Available to all authenticated users")
-    public SizeResponseDto updateSize(Authentication authentication,
+    public CellResponseDto updateSize(Authentication authentication,
                                       @RequestParam Long lineId,
                                       @RequestParam Long sizeId,
                                       @PathVariable Integer value) {

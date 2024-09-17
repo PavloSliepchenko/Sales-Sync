@@ -6,7 +6,7 @@ import com.example.salessync.dto.line.SupplySheetLineResponseDto;
 import com.example.salessync.model.SupplySheetLine;
 import org.mapstruct.Mapper;
 
-@Mapper(config = MapperConfig.class, uses = SizeMapper.class)
+@Mapper(config = MapperConfig.class, uses = CellMapper.class)
 public interface SupplySheetLineMapper {
     SupplySheetLine toModel(CreateSupplySheetLineRequestDto createLineRequestDto);
 

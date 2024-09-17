@@ -1,6 +1,6 @@
 package com.example.salessync.dto.line;
 
-import com.example.salessync.dto.size.UpdateSizeRequestDto;
+import com.example.salessync.dto.cell.UpdateCellRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -23,5 +23,5 @@ public class CreateSupplySheetLineRequestDto {
     private Integer supply;
     @NotNull
     private String brand;
-    private List<UpdateSizeRequestDto> sizes;
+    private List<UpdateCellRequestDto> sizes;
 }
