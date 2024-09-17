@@ -51,7 +51,7 @@ public class SupplySheetLine {
             joinColumns = @JoinColumn(name = "line_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "size_id", referencedColumnName = "id")
     )
-    private List<Size> sizes;
+    private List<Cell> sizes;
     @ManyToOne
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

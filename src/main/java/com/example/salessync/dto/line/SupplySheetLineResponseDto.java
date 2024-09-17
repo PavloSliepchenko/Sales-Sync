@@ -1,6 +1,6 @@
 package com.example.salessync.dto.line;
 
-import com.example.salessync.dto.size.SizeResponseDto;
+import com.example.salessync.dto.cell.CellResponseDto;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.Data;
@@ -19,5 +19,5 @@ public class SupplySheetLineResponseDto {
     private BigDecimal totalPrice;
     private Integer supply;
     private String brand;
-    private List<SizeResponseDto> sizes;
+    private List<CellResponseDto> sizes;
 }
